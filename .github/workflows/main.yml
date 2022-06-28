@@ -1,0 +1,21 @@
+name: Deploy to Heroku
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: Heroku # naam van mijn environment op GitHub
+    steps:
+      - uses: actions/checkout@v2
+      - uses: akhileshns/heroku-deploy@v3.12.12
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          # heroku_api_key:
+          #   9ba60580-2aea-4433-9f8b-2602246d89a9
+          heroku_app_name: share-a-meal-2183391
+          heroku_email: snjw.bos@student.avans.nl
