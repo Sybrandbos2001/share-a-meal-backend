@@ -1,31 +1,28 @@
 {
-    "name": "nodejs-server",
-    "version": "0.0.1",
-    "description": "Programmeren 4 SAM server",
-    "main": "index.js",
-    "scripts": {
-        "start": "nodemon index.js",
-        "test": "mocha -reporter spec test/**/*.test.js --exit"
-    },
-    "author": "Robin",
-    "license": "ISC",
-    "devDependencies": {
-        "chai": "^4.3.6",
-        "chai-http": "^4.3.0",
-        "mocha": "^9.2.2",
-        "nodemon": "^2.0.15"
-    },
-    "dependencies": {
-        "dotenv": "^16.0.0",
-        "express": "^4.17.3",
-        "jsonwebtoken": "^8.5.1",
-        "mysql2": "^2.3.3",
-        "tracer": "^1.1.5"
-    },
-    "prettier": {
-        "trailingComma": "es5",
-        "tabWidth": 4,
-        "semi": false,
-        "singleQuote": true
-    }
+  "name": "programmeren-4-shareameal",
+  "version": "0.0.1",
+  "description": "Programmeren 4 SAM server",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "mocha test/**/*.test.js --exit"
+  },
+  "author": "Joost van Dam",
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "^4.3.6",
+    "chai-http": "^4.3.0",
+    "mocha": "^9.2.2",
+    "nodemon": "^1.3.3"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.0",
+    "dotenv": "^16.0.0",
+    "express": "^4.17.3",
+    "heroku": "^7.33.3",
+    "jsonwebtoken": "^8.5.1",
+    "mysql2": "^2.3.3",
+    "tracer": "^1.1.5"
+  }
 }
