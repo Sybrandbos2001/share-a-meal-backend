@@ -10,12 +10,6 @@ const mealRoutes = require("./src/routes/meal.routes");
 const bodyParser = require("body-parser");
 app.use(bodyParser.json());
 
-app.all("*", (req, res, next) => {
-    const method = req.method;
-    console.log(`Method ${method} is aangeroepen`);
-    next();
-});
-
 app.get("/", (req, res) => {
     res.status(200).json({
         status: 200,
@@ -44,15 +38,5 @@ app.use((err, req, res, next) => {
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`);
 });
-
-process.on('SIGINT', () => {
-    logger.debug('SIGINT signal received: closing HTTP server')
-    dbconnection.end((err) => {
-        logger.debug('Database connection closed')
-    })
-    app.close(() => {
-        logger.debug('HTTP server closed')
-    })
-})
 
 module.exports = app;

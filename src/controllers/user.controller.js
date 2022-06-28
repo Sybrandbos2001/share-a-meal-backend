@@ -113,26 +113,23 @@ let controller = {
     },
 
     getAllUsers: (req, res) => {
-        const queryParams = req.query;
-
-        let { firstName, isActive } = req.query;
-        let queryString = "SELECT * FROM `user`";
-        if (firstName || isActive) {
-            queryString += " WHERE ";
-            if (firstName) {
-                queryString += "`firstName` LIKE ?";
-                firstName = "%" + firstName + "%";
-            }
-            if (firstName && isActive) queryString += " AND ";
-            if (isActive) {
-                queryString += "`isActive` = ?";
-            }
+        const { length, isActive, firstName } = req.query;
+        let query = "SELECT * FROM `user`";
+        if (isActive && firstName) {
+            query += ` WHERE firstName = '${firstName}' AND isActive = ${isActive}`;
+        } else if (isActive) {
+            query += ` WHERE isActive = ${isActive}`;
+        } else if (firstName) {
+            query += ` WHERE firstName = '${firstName}'`;
         }
-        queryString += ";";
+        if (length) {
+            query += ` LIMIT ${length}`;
+        }
+        query += ";";
 
         pool.getConnection(function(err, connection) {
             connection.query(
-                queryString, [firstName, isActive],
+                query, [firstName, isActive],
                 function(error, results, fields) {
                     connection.release();
                     if (error) throw error;
@@ -146,10 +143,9 @@ let controller = {
     },
 
     getUserProfile: (req, res) => {
-        const getprofilebyid = req.userId;
         pool.getConnection(function(err, connection) {
             connection.query(
-                `SELECT * FROM user WHERE id = ${getprofilebyid}`,
+                `SELECT * FROM user WHERE id = ` + req.userId,
                 function(error, results, fields) {
                     connection.release();
                     if (error) throw error;
@@ -199,122 +195,109 @@ let controller = {
         });
     },
 
-    updateUserById: (req, res) => {
-        const putsingleuserbyid = req.params.id;
-        let updatedUser = { idUser: putsingleuserbyid, ...req.body };
-
+    updateUserById(req, res, next) {
         pool.getConnection(function(err, connection) {
-            if (err) throw err;
-            connection.query(
-                "UPDATE user SET firstName=?, lastName=?, isActive=?, emailAdress=?, password=?, phoneNumber=?, street=?, city=? WHERE id = ?", [
-                    updatedUser.firstName,
-                    updatedUser.lastName,
-                    updatedUser.isActive,
-                    updatedUser.emailAdress,
-                    updatedUser.password,
-                    updatedUser.phoneNumber,
-                    updatedUser.street,
-                    updatedUser.city,
-                    putsingleuserbyid,
-                ],
-                function(error, results, fields) {
-                    connection.release();
-                    if (error) {
-                        if (error.errno == 1292) {
-                            console.log("1292 error: " + error);
-                            return res.status(400).json({
-                                status: 400,
-                            });
+            //not connected
+            if (err) {
+                next(err);
+            }
+            if (req.params.id != req.userId) {
+                return res.status(400).json({
+                    status: 400,
+                    message: `User doesn't exists, or not authorized to update the user.`,
+                });
+            } else {
+                // Use the connection
+                connection.query(
+                    "UPDATE user SET ? WHERE id = ?", [req.body, req.params.id],
+                    function(error, results, fields) {
+                        // When done with the connection, release it.
+                        connection.release();
+                        // Handle error after the release.
+                        if (error) {
+                            next(error);
                         }
-                        return res.status(400).json({
-                            status: 400,
-                            error: error.message,
-                        });
-                    }
 
-                    if (results) {
-                        if (results.affectedRows === 0) {
-                            return res.status(400).json({
+                        // succesfull query handlers
+                        if (results.affectedRows > 0) {
+                            userToUpdate = req.body;
+                            res.status(200).json({
+                                status: 200,
+                                result: { id: req.params.id, ...userToUpdate },
+                            });
+                        } else {
+                            res.status(400).json({
                                 status: 400,
-                                message: "User does not exist",
+                                message: `Can't find user with ID: ${req.params.id}`,
                             });
                         }
-                        connection.query(
-                            `SELECT * FROM user WHERE id = '${putsingleuserbyid}'`,
-                            function(error, results, fields) {
-                                connection.release();
-                                if (results) {
-                                    res.status(200).json({
-                                        status: 200,
-                                        result: results[0],
-                                    });
-                                }
-                            }
-                        );
-                    } else {
-                        return res.status(400).json({
-                            status: 400,
-                        });
                     }
-                }
-            );
+                );
+            }
         });
     },
 
     deleteUserById: (req, res) => {
-        pool.getConnection(function(err, connection) {
-            if (err) {
-                throw res.status(400).json({
-                    status: 400,
-                    error: err,
-                });
-            }
-
-            connection.query(
-                "DELETE FROM user WHERE id = " + req.params.id,
-                function(error, results, fields) {
-                    connection.release();
-                    if (error) {
-                        if (error.errno == 1054) {
-                            console.log("NUMMER 1054 ERROR LET OP DEZE: " + error);
-                            return res.status(400).json({
-                                status: 400,
-                            });
-                        }
-
-                        let errorMessage = error.message;
-
-                        if (error.errno == 1451) {
-                            errorMessage = `Foreignkey error delete failed!`;
-                        }
-
-                        return res.status(400).json({
-                            status: 400,
-                            error: errorMessage,
-                        });
-                    }
-
-                    if (results) {
-
-                        if (results.affectedRows === 0) {
-                            return res.status(400).json({
-                                status: 400,
-                                message: "User does not exist",
-                            });
-                        }
-
-                        return res.status(200).json({
-                            status: 200,
-                            message: "Deleted",
-                        });
-                    } else {
-                        return res.status(400).json({
-                            status: 400,
-                        });
-                    }
+        if (req.userId === Number(req.params.id)) {
+            pool.getConnection(function(err, connection) {
+                if (err) {
+                    throw res.status(400).json({
+                        status: 400,
+                        error: err,
+                    });
                 }
-            );
-        });
+
+                connection.query(
+                    "DELETE FROM user WHERE id = " + req.params.id,
+                    function(error, results, fields) {
+                        connection.release();
+                        if (error) {
+                            if (error.errno == 1054) {
+                                console.log("NUMMER 1054 ERROR LET OP DEZE: " + error);
+                                return res.status(400).json({
+                                    status: 400,
+                                });
+                            }
+
+                            let errorMessage = error.message;
+
+                            if (error.errno == 1451) {
+                                errorMessage = `Foreignkey error delete failed!`;
+                            }
+
+                            return res.status(400).json({
+                                status: 400,
+                                error: errorMessage,
+                            });
+                        }
+
+                        if (results) {
+
+                            if (results.affectedRows === 0) {
+                                return res.status(400).json({
+                                    status: 400,
+                                    message: "User does not exist",
+                                });
+                            }
+
+                            return res.status(200).json({
+                                status: 200,
+                                message: "Deleted",
+                            });
+                        } else {
+                            return res.status(400).json({
+                                status: 400,
+                            });
+                        }
+                    }
+                );
+            });
+        } else {
+            return res.status(401).json({
+                status: 401,
+                message: "Unauthorized, this is not your account/acount does not exist",
+            });
+        }
     },
 };
 

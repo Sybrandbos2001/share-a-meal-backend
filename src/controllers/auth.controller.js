@@ -43,7 +43,7 @@ let controller = {
                                     function(err, token) {
                                         res.status(200).json({
                                             status: 200,
-                                            message: {...userinfo, token },
+                                            result: {...userinfo, token },
                                         });
                                     }
                                 );
@@ -96,7 +96,6 @@ let controller = {
 
             jwt.verify(token, jwtSecretKey, (err, payload) => {
                 if (err) {
-                    logger.warn("Not authorized");
                     res.status(401).json({
                         error: "Not authorized",
                         datetime: new Date().toISOString(),

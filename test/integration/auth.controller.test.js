@@ -15,31 +15,31 @@ const CLEAR_USERS_TABLE = "DELETE IGNORE FROM `user`;";
 const CLEAR_DB =
     CLEAR_MEAL_TABLE + CLEAR_PARTICIPANTS_TABLE + CLEAR_USERS_TABLE;
 
-const TEST_USERS =
-    "INSERT INTO user (firstName, lastName, isActive, emailAdress, password, street, city) VALUES ('Klaas' ,'Petersen' ,1 ,'klaaspetersen@gmail.com' ,'GeheimWW123!' ,'Lovensdijkstraat', 'Breda'), ('Robin' ,'Schellius' ,0 ,'robin.schellius@avans.nl' ,'wachtwoord456FDSD@$##' ,'Hogeschoollaan', 'Breda')";
-const TEST_USER_AT_ID_IS_1000000 =
-    "INSERT INTO user (id, firstName, lastName, isActive, emailAdress, password, street, city) VALUES (1000000, 'Klaas' ,'Petersen' ,1 ,'klaaspetersen@gmail.com' ,'GeheimWW123!' ,'Lovensdijkstraat', 'Breda')";
+const INSERT_USER =
+    "INSERT INTO `user` (`id`, `firstName`, `lastName`, `street`, `city`, `isActive`, `password`, `emailAdress`,  `phoneNumber` ) VALUES" +
+    '(1, "Sybrand", "Bos", "Lovendijkstraat", "Breda", true,  "Welkom01!", "sybrandbos@gmail.com", "0612345678"),' +
+    '(2, "Klaas", "Petersen", "Lovendijkstraat", "Breda", false,  "Welkom01!", "Klaaspetersen@gmail.com", "0612345678");';
 
 describe("Share-a-meal API Tests | Login", () => {
     describe("UC-101 Login", () => {
-        before((done) => {
+        beforeEach((done) => {
             pool.getConnection(function(err, connection) {
-                if (err) throw err;
-                connection.query(CLEAR_DB, function(error, result, field) {
-                    if (error) throw error;
-                    connection.query(
-                        TEST_USER_AT_ID_IS_1000000,
-                        function(error, result, field) {
-                            if (error) throw error;
-                            connection.release();
-                            done();
-                        }
-                    );
-                });
+                if (err) throw err; // not connected!
+                connection.query(
+                    CLEAR_DB + INSERT_USER,
+                    function(error, results, fields) {
+                        // When done with the connection, release it.
+                        connection.release();
+
+                        // Handle error after the release.
+                        if (error) throw error;
+                        done();
+                    }
+                );
             });
         });
 
-        it.only("TC-101-1 Verplicht veld ontbreekt", (done) => {
+        it("TC-101-1 Verplicht veld ontbreekt", (done) => {
             chai
                 .request(server)
                 .post("/api/auth/login")
@@ -57,7 +57,7 @@ describe("Share-a-meal API Tests | Login", () => {
                 });
         });
 
-        it.only("TC-101-2 Niet-valide email adres", (done) => {
+        it("TC-101-2 Niet-valide email adres", (done) => {
             chai
                 .request(server)
                 .post("/api/auth/login")
@@ -74,7 +74,7 @@ describe("Share-a-meal API Tests | Login", () => {
                 });
         });
 
-        it.only("TC-101-3 Niet-valide wachtwoord", (done) => {
+        it("TC-101-3 Niet-valide wachtwoord", (done) => {
             chai
                 .request(server)
                 .post("/api/auth/login")
@@ -91,7 +91,7 @@ describe("Share-a-meal API Tests | Login", () => {
                 });
         });
 
-        it.only("TC-101-4 user does not exist", (done) => {
+        it("TC-101-4 user does not exist", (done) => {
             chai
                 .request(server)
                 .post("/api/auth/login")
@@ -110,19 +110,19 @@ describe("Share-a-meal API Tests | Login", () => {
                 });
         });
 
-        it.only("TC-101-5 Gebruiker succesvol ingelogd", (done) => {
+        it("TC-101-5 Gebruiker succesvol ingelogd", (done) => {
             chai
                 .request(server)
                 .post("/api/auth/login")
                 .send({
-                    emailAdress: "klaaspetersen@gmail.com",
-                    password: "GeheimWW123!",
+                    emailAdress: "sybrandbos@gmail.com",
+                    password: "Welkom01!",
                 })
                 .end((err, res) => {
                     res.should.be.an("Object");
-                    let { status, message } = res.body;
+                    let { status, result } = res.body;
                     status.should.equals(200);
-                    message.emailAdress.should.equals("klaaspetersen@gmail.com");
+                    result.emailAdress.should.equals("sybrandbos@gmail.com");
                     done();
                 });
         });

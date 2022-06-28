@@ -159,7 +159,7 @@ let controller = {
                     } else {
                         return res.status(400).json({
                             status: 400,
-                            message: "Ik weet niet hoe ik hier kom",
+                            message: "Unknown error",
                         });
                     }
                 }

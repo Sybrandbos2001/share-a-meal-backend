@@ -50,7 +50,7 @@ describe("Share-a-meal API Tests | Meals", () => {
             });
         });
 
-        it.only("TC 301-1: verplicht veld ontbreek", (done) => {
+        it("TC 301-1: verplicht veld ontbreek", (done) => {
             chai
                 .request(server)
                 .post("/api/meal")
@@ -80,7 +80,7 @@ describe("Share-a-meal API Tests | Meals", () => {
                 });
         });
 
-        it.only("TC-301-2 Niet ingelogd", (done) => {
+        it("TC-301-2 Niet ingelogd", (done) => {
             chai
                 .request(server)
                 .post("/api/meal")
@@ -107,7 +107,7 @@ describe("Share-a-meal API Tests | Meals", () => {
                 });
         });
 
-        it.only("TC-301-3 Maaltijd succesvol toegevoegd", (done) => {
+        it("TC-301-3 Maaltijd succesvol toegevoegd", (done) => {
             chai
                 .request(server)
                 .post("/api/meal")
@@ -173,7 +173,7 @@ describe("Share-a-meal API Tests | Meals", () => {
             });
         });
 
-        it.only("TC-303-1 Lijst van maaltijden geretourneerd", (done) => {
+        it("TC-303-1 Lijst van maaltijden geretourneerd", (done) => {
             chai
                 .request(server)
                 .get("/api/meal")
@@ -192,7 +192,7 @@ describe("Share-a-meal API Tests | Meals", () => {
     });
 
     describe("UC-304 Details van een maaltijd opvragen", () => {
-        it.only("TC-304-1 Maaltijd bestaat niet", (done) => {
+        it("TC-304-1 Maaltijd bestaat niet", (done) => {
             chai
                 .request(server)
                 .get("/api/meal/999999")
@@ -208,7 +208,7 @@ describe("Share-a-meal API Tests | Meals", () => {
                     done();
                 });
         });
-        it.only("TC-304-2 Details van maaltijd geretourneerd", (done) => {
+        it("TC-304-2 Details van maaltijd geretourneerd", (done) => {
             chai
                 .request(server)
                 .get("/api/meal/100")
@@ -264,7 +264,7 @@ describe("Share-a-meal API Tests | Meals", () => {
             });
         });
 
-        it.only("TC-305-2 Niet ingelogd", (done) => {
+        it("TC-305-2 Niet ingelogd", (done) => {
             chai
                 .request(server)
                 .delete("/api/meal/5")
@@ -280,7 +280,7 @@ describe("Share-a-meal API Tests | Meals", () => {
                 });
         });
 
-        it.only("TC-305-3 Niet de eigenaar van de data", (done) => {
+        it("TC-305-3 Niet de eigenaar van de data", (done) => {
             chai
                 .request(server)
                 .delete("/api/meal/100")
@@ -294,7 +294,7 @@ describe("Share-a-meal API Tests | Meals", () => {
                 });
         });
 
-        it.only("TC-305-4 Maaltijd bestaat niet", (done) => {
+        it("TC-305-4 Maaltijd bestaat niet", (done) => {
             chai
                 .request(server)
                 .delete("/api/meal/1234")
@@ -310,7 +310,7 @@ describe("Share-a-meal API Tests | Meals", () => {
                     done();
                 });
         });
-        it.only("TC-305-5 Maaltijd succesvol verwijderd", (done) => {
+        it("TC-305-5 Maaltijd succesvol verwijderd", (done) => {
             chai
                 .request(server)
                 .delete("/api/meal/100")

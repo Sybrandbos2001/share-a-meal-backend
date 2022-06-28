@@ -21,34 +21,31 @@ const CLEAR_USERS_TABLE = "DELETE IGNORE FROM `user`;";
 const CLEAR_DB =
     CLEAR_MEAL_TABLE + CLEAR_PARTICIPANTS_TABLE + CLEAR_USERS_TABLE;
 
-const TEST_USERS =
-    "INSERT INTO user (firstName, lastName, isActive, emailAdress, password, street, city) VALUES ('Klaas' ,'Petersen' ,1 ,'klaaspetersen@gmail.com' ,'GeheimWW123!' ,'Lovensdijkstraat', 'Breda'), ('Robin' ,'Schellius' ,0 ,'robin.schellius@avans.nl' ,'wachtwoord456FDSD@$##' ,'Hogeschoollaan', 'Breda')";
-const TEST_USER_AT_ID_IS_1000000 =
-    "INSERT INTO user (id, firstName, lastName, isActive, emailAdress, password, street, city) VALUES (1000000, 'Klaas' ,'Petersen' ,1 ,'klaaspetersen@gmail.com' ,'GeheimWW123!' ,'Lovensdijkstraat', 'Breda')";
+const INSERT_USER =
+    "INSERT INTO `user` (`id`, `firstName`, `lastName`, `street`, `city`, `isActive`, `password`, `emailAdress`,  `phoneNumber` ) VALUES" +
+    '(1, "Sybrand", "Bos", "Lovendijkstraat", "Breda", true,  "Welkom01!", "sybrandbos@gmail.com", "0612345678"),' +
+    '(2, "Klaas", "Petersen", "Lovendijkstraat", "Breda", false,  "Welkom01!", "Klaaspetersen@gmail.com", "0612345678");';
 
 describe("Share-a-meal API Tests | Users", () => {
     describe("UC-201 Registreren als nieuwe gebruiker", () => {
         beforeEach((done) => {
             pool.getConnection(function(err, connection) {
-                if (err) throw err;
-                connection.query(CLEAR_DB, function(error, result, field) {
-                    if (error) throw error;
-                    connection.query(TEST_USERS, function(error, result, field) {
+                if (err) throw err; // not connected!
+                connection.query(
+                    CLEAR_DB + INSERT_USER,
+                    function(error, results, fields) {
+                        // When done with the connection, release it.
+                        connection.release();
+
+                        // Handle error after the release.
                         if (error) throw error;
-                        connection.query(
-                            "SELECT * FROM user",
-                            function(error, result, field) {
-                                if (error) throw error;
-                                connection.release();
-                                done();
-                            }
-                        );
-                    });
-                });
+                        done();
+                    }
+                );
             });
         });
 
-        it.only("TC-201-1 Verplicht veld ontbreekt", (done) => {
+        it("TC-201-1 Verplicht veld ontbreekt", (done) => {
             chai
                 .request(server)
                 .post("/api/user")
@@ -70,7 +67,7 @@ describe("Share-a-meal API Tests | Users", () => {
                 });
         });
 
-        it.only("TC-201-2 Niet-valide email adres", (done) => {
+        it("TC-201-2 Niet-valide email adres", (done) => {
             chai
                 .request(server)
                 .post("/api/user")
@@ -93,7 +90,7 @@ describe("Share-a-meal API Tests | Users", () => {
                 });
         });
 
-        it.only("TC-201-3 Niet-valide wachtwoord", (done) => {
+        it("TC-201-3 Niet-valide wachtwoord", (done) => {
             chai
                 .request(server)
                 .post("/api/user")
@@ -116,7 +113,7 @@ describe("Share-a-meal API Tests | Users", () => {
                 });
         });
 
-        it.only("TC-201-4 Gebruiker bestaat al", (done) => {
+        it("TC-201-4 Gebruiker bestaat al", (done) => {
             chai
                 .request(server)
                 .post("/api/user")
@@ -139,7 +136,7 @@ describe("Share-a-meal API Tests | Users", () => {
                 });
         });
 
-        it.only("TC-201-5 Gebruiker succesvol geregistreerd", (done) => {
+        it("TC-201-5 Gebruiker succesvol geregistreerd", (done) => {
             chai
                 .request(server)
                 .post("/api/user")
@@ -176,19 +173,25 @@ describe("Share-a-meal API Tests | Users", () => {
     describe("UC-202 Overzicht van gebruikers", () => {
         beforeEach((done) => {
             pool.getConnection(function(err, connection) {
-                if (err) throw err;
-                connection.query(CLEAR_DB, function(error, result, field) {
-                    if (error) throw error;
-                    connection.release();
-                    done();
-                });
+                if (err) throw err; // not connected!
+                connection.query(
+                    CLEAR_DB + INSERT_USER,
+                    function(error, results, fields) {
+                        // When done with the connection, release it.
+                        connection.release();
+
+                        // Handle error after the release.
+                        if (error) throw error;
+                        done();
+                    }
+                );
             });
         });
 
-        it.only("TC-202-1 Toon nul gebruikers", (done) => {
+        it("TC-202-1 Toon nul gebruikers", (done) => {
             chai
                 .request(server)
-                .get("/api/user")
+                .get("/api/user?length=0")
                 .set("authorization", "Bearer " + jwt.sign({ userId: 1 }, jwtSecretKey))
                 .end((err, res) => {
                     res.should.be.an("Object");
@@ -199,17 +202,10 @@ describe("Share-a-meal API Tests | Users", () => {
                 });
         });
 
-        it.only("TC-202-2 Toon twee gebruikers", (done) => {
-            pool.getConnection(function(err, connection) {
-                connection.query(TEST_USERS, function(error, result, field) {
-                    if (error) throw error;
-                    connection.release();
-                });
-            });
-
+        it("TC-202-2 Toon twee gebruikers", (done) => {
             chai
                 .request(server)
-                .get("/api/user")
+                .get("/api/user?length=2")
                 .set("authorization", "Bearer " + jwt.sign({ userId: 1 }, jwtSecretKey))
                 .end((err, res) => {
                     res.should.be.an("Object");
@@ -220,7 +216,7 @@ describe("Share-a-meal API Tests | Users", () => {
                 });
         });
 
-        it.only("TC-202-3 Toon gebruikers met zoekterm op niet-bestaande naam", (done) => {
+        it("TC-202-3 Toon gebruikers met zoekterm op niet-bestaande naam", (done) => {
             chai
                 .request(server)
                 .get("/api/user?firstName=USERVANANDEREPLANEET")
@@ -234,7 +230,7 @@ describe("Share-a-meal API Tests | Users", () => {
                 });
         });
 
-        it.only("TC-202-4 Toon gebruikers met gebruik van de zoekterm op het veld isActive=false", (done) => {
+        it("TC-202-4 Toon gebruikers met gebruik van de zoekterm op het veld isActive=false", (done) => {
             chai
                 .request(server)
                 .get("/api/user?isActive=false")
@@ -243,12 +239,12 @@ describe("Share-a-meal API Tests | Users", () => {
                     res.should.be.an("object");
                     const { status, results } = res.body;
                     status.should.equals(200);
-                    results.should.be.an("array").that.has.length(0);
+                    results.should.be.an("array").that.has.length(1);
                     done();
                 });
         });
 
-        it.only("TC-202-5 Toon gebruikers met gebruik van de zoekterm op het veld isActive=true", (done) => {
+        it("TC-202-5 Toon gebruikers met gebruik van de zoekterm op het veld isActive=true", (done) => {
             chai
                 .request(server)
                 .get("/api/user?isActive=true")
@@ -257,11 +253,11 @@ describe("Share-a-meal API Tests | Users", () => {
                     res.should.be.an("object");
                     const { status, results } = res.body;
                     status.should.equals(200);
-                    results.should.be.an("array").that.has.length(0);
+                    results.should.be.an("array").that.has.length(1);
                     done();
                 });
         });
-        it.only("TC-202-6 Toon gebruikers met zoekterm op bestaande naam", (done) => {
+        it("TC-202-6 Toon gebruikers met zoekterm op bestaande naam", (done) => {
             chai
                 .request(server)
                 .get("/api/user?firstName=Robin")
@@ -277,27 +273,82 @@ describe("Share-a-meal API Tests | Users", () => {
     });
 
     describe("UC-203 Gebruikersprofiel opvragen", () => {
-        it.only("TC-203-1 Ongeldig token", (done) => {
+        beforeEach((done) => {
+            pool.getConnection(function(err, connection) {
+                if (err) throw err; // not connected!
+                connection.query(
+                    CLEAR_DB + INSERT_USER,
+                    function(error, results, fields) {
+                        // When done with the connection, release it.
+                        connection.release();
+
+                        // Handle error after the release.
+                        if (error) throw error;
+                        done();
+                    }
+                );
+            });
+        });
+        it("TC-203-1 Ongeldig token", (done) => {
             chai
                 .request(server)
-                .get("/api/user")
-                .set("authorization", "Bearer " + jwt.sign({ userId: 1 }, jwtSecretKey))
+                .get("/api/user/profile")
+                .set("authorization", "Bearer " + jwt.sign({ userId: 1 }, jwtSecretKey) + "wrongBearer")
                 .end((err, res) => {
+                    res.should.be.an("Object");
+                    let { error } = res.body;
+                    error.should.be.a("string").that.equals("Not authorized");
                     done();
                 });
         });
 
-        it.only("TC-203-2 Valide token en gebruiker bestaat.", (done) => {
-            done();
+        it("TC-203-2 Valide token en gebruiker bestaat.", (done) => {
+            chai
+                .request(server)
+                .get("/api/user/profile")
+                .set("authorization", "Bearer " + jwt.sign({ userId: 1 }, jwtSecretKey))
+                .end((err, res) => {
+                    res.should.be.an("Object");
+                    let { status, results } = res.body;
+                    status.should.equals(200);
+                    results.should.be.an("Object");
+                    done();
+                });
         });
     });
 
     describe("UC-204 Details van gebruiker", () => {
-        it.only("TC-204-1 Ongeldig token", (done) => {
-            done();
+        beforeEach((done) => {
+            pool.getConnection(function(err, connection) {
+                if (err) throw err; // not connected!
+                connection.query(
+                    CLEAR_DB + INSERT_USER,
+                    function(error, results, fields) {
+                        // When done with the connection, release it.
+                        connection.release();
+
+                        // Handle error after the release.
+                        if (error) throw error;
+                        done();
+                    }
+                );
+            });
         });
 
-        it.only("TC-204-2 User does not exist", (done) => {
+        it("TC-204-1 Ongeldig token", (done) => {
+            chai
+                .request(server)
+                .get("/api/user/1")
+                .set("authorization", "Bearer " + jwt.sign({ userId: 1 }, jwtSecretKey) + "wrongBearer")
+                .end((err, res) => {
+                    res.should.be.an("Object");
+                    let { error } = res.body;
+                    error.should.be.a("string").that.equals("Not authorized");
+                    done();
+                });
+        });
+
+        it("TC-204-2 User does not exist", (done) => {
             chai
                 .request(server)
                 .get("/api/user/0")
@@ -311,24 +362,10 @@ describe("Share-a-meal API Tests | Users", () => {
                 });
         });
 
-        it.only("TC-204-3 Gebruiker-ID bestaat", (done) => {
-            pool.getConnection(function(err, connection) {
-                if (err) throw err;
-                connection.query(CLEAR_DB, function(error, result, field) {
-                    if (error) throw error;
-                    connection.query(
-                        TEST_USER_AT_ID_IS_1000000,
-                        function(error, result, field) {
-                            if (error) throw error;
-                            connection.release();
-                        }
-                    );
-                });
-            });
-
+        it("TC-204-3 Gebruiker-ID bestaat", (done) => {
             chai
                 .request(server)
-                .get("/api/user/1000000")
+                .get("/api/user/1")
                 .set("authorization", "Bearer " + jwt.sign({ id: 1 }, jwtSecretKey))
                 .end((err, res) => {
                     res.should.be.an("Object");
@@ -343,22 +380,22 @@ describe("Share-a-meal API Tests | Users", () => {
     describe("UC-205 Gebruiker wijzigen", () => {
         beforeEach((done) => {
             pool.getConnection(function(err, connection) {
-                if (err) throw err;
-                connection.query(CLEAR_DB, function(error, result, field) {
-                    if (error) throw error;
-                    connection.query(
-                        TEST_USER_AT_ID_IS_1000000,
-                        function(error, result, field) {
-                            if (error) throw error;
-                            connection.release();
-                            done();
-                        }
-                    );
-                });
+                if (err) throw err; // not connected!
+                connection.query(
+                    CLEAR_DB + INSERT_USER,
+                    function(error, results, fields) {
+                        // When done with the connection, release it.
+                        connection.release();
+
+                        // Handle error after the release.
+                        if (error) throw error;
+                        done();
+                    }
+                );
             });
         });
 
-        it.only("TC-205-1 Verplicht veld “emailAdress” ontbreekt", (done) => {
+        it("TC-205-1 Verplicht veld “emailAdress” ontbreekt", (done) => {
             chai
                 .request(server)
                 .put("/api/user/1000000")
@@ -382,7 +419,7 @@ describe("Share-a-meal API Tests | Users", () => {
                 });
         });
 
-        it.only("TC-205-3 Niet-valide telefoonnummer", (done) => {
+        it("TC-205-3 Niet-valide telefoonnummer", (done) => {
             chai
                 .request(server)
                 .put("/api/user/1000000")
@@ -406,31 +443,35 @@ describe("Share-a-meal API Tests | Users", () => {
                 });
         });
 
-        it.only("TC-205-4 Gebruiker bestaat niet", (done) => {
+        it("TC-205-4 Gebruiker bestaat niet", (done) => {
             chai
                 .request(server)
-                .put("/api/user/999999")
+                .put(`/api/user/0`)
+                .set("authorization", "Bearer " + jwt.sign({ userId: 2 }, jwtSecretKey))
                 .send({
-                    firstName: "John",
-                    lastName: "Doe",
-                    street: "Lovensdijkstraat 61",
+                    firstName: "Sybrand",
+                    lastName: "Bos",
+                    street: "Lisdodde",
                     city: "Breda",
                     isActive: true,
-                    emailAdress: "h.doe@server.com",
-                    password: "secret(849f4DdR",
-                    phoneNumber: "06 12345678",
+                    password: "Welkom01!",
+                    emailAdress: "sybrandbos@gmail.com",
+                    phoneNumber: "0612345678",
                 })
-                .set("authorization", "Bearer " + jwt.sign({ userId: 1 }, jwtSecretKey))
                 .end((err, res) => {
-                    res.should.be.an("Object");
+                    res.should.be.an("object");
                     let { status, message } = res.body;
                     status.should.equals(400);
-                    message.should.be.a("string").that.equals("User does not exist");
+                    message.should.be
+                        .a("string")
+                        .that.equals(
+                            "User doesn't exists, or not authorized to update the user."
+                        );
                     done();
                 });
         });
 
-        it.only("TC-205-5 Niet ingelogd", (done) => {
+        it("TC-205-5 Niet ingelogd", (done) => {
             chai
                 .request(server)
                 .put("/api/user/1000000")
@@ -455,10 +496,11 @@ describe("Share-a-meal API Tests | Users", () => {
                 });
         });
 
-        it.only("TC-205-6 Gebruiker succesvol gewijzigd", (done) => {
+        it("TC-205-6 Gebruiker succesvol gewijzigd", (done) => {
             chai
                 .request(server)
-                .put("/api/user/1000000")
+                .put("/api/user/1")
+                .set("authorization", "Bearer " + jwt.sign({ userId: 1 }, jwtSecretKey))
                 .send({
                     firstName: "Klaas",
                     lastName: "Doe",
@@ -466,10 +508,9 @@ describe("Share-a-meal API Tests | Users", () => {
                     city: "Breda",
                     isActive: true,
                     emailAdress: "joost@server.com",
-                    password: "secret635f#w2s2",
+                    password: "SECret635f#w2s2",
                     phoneNumber: "06 12425475",
                 })
-                .set("authorization", "Bearer " + jwt.sign({ userId: 1 }, jwtSecretKey))
                 .end((err, res) => {
                     let { status, result } = res.body;
                     status.should.equals(200);
@@ -479,9 +520,9 @@ describe("Share-a-meal API Tests | Users", () => {
                         lastName: "Doe",
                         street: "Lovensdijkstraat 61",
                         city: "Breda",
-                        isActive: 1,
+                        isActive: true,
                         emailAdress: "joost@server.com",
-                        password: "secret635f#w2s2",
+                        password: "SECret635f#w2s2",
                         phoneNumber: "06 12425475",
                     });
                     done();
@@ -492,22 +533,22 @@ describe("Share-a-meal API Tests | Users", () => {
     describe("UC-206 Gebruiker verwijderen", () => {
         beforeEach((done) => {
             pool.getConnection(function(err, connection) {
-                if (err) throw err;
-                connection.query(CLEAR_DB, function(error, result, field) {
-                    if (error) throw error;
-                    connection.query(
-                        TEST_USER_AT_ID_IS_1000000,
-                        function(error, result, field) {
-                            if (error) throw error;
-                            connection.release();
-                            done();
-                        }
-                    );
-                });
+                if (err) throw err; // not connected!
+                connection.query(
+                    CLEAR_DB + INSERT_USER,
+                    function(error, results, fields) {
+                        // When done with the connection, release it.
+                        connection.release();
+
+                        // Handle error after the release.
+                        if (error) throw error;
+                        done();
+                    }
+                );
             });
         });
 
-        it.only("TC-206-1 Gebruiker bestaat niet", (done) => {
+        it("TC-206-1 Gebruiker bestaat niet", (done) => {
             chai
                 .request(server)
                 .delete("/api/user/0")
@@ -515,13 +556,13 @@ describe("Share-a-meal API Tests | Users", () => {
                 .end((err, res) => {
                     res.should.be.an("Object");
                     let { status, message } = res.body;
-                    status.should.equals(400);
-                    message.should.be.a("string").that.equals("User does not exist");
+                    status.should.equals(401);
+                    message.should.be.a("string").that.equals("Unauthorized, this is not your account/acount does not exist");
                     done();
                 });
         });
 
-        it.only("TC-206-2 Niet ingelogd", (done) => {
+        it("TC-206-2 Niet ingelogd", (done) => {
             chai
                 .request(server)
                 .delete("/api/user/1000000")
@@ -536,14 +577,24 @@ describe("Share-a-meal API Tests | Users", () => {
                 });
         });
 
-        it.only("TC-206-3 Actor is geen eigenaar", (done) => {
-            done();
-        });
-
-        it.only("TC-206-4 Gebruiker succesvol verwijderd", (done) => {
+        it("TC-206-3 User is geen eigenaar", (done) => {
             chai
                 .request(server)
-                .delete("/api/user/1000000")
+                .delete("/api/user/4")
+                .set("authorization", "Bearer " + jwt.sign({ userId: 1 }, jwtSecretKey))
+                .end((err, res) => {
+                    res.should.be.an("Object");
+                    let { status, message } = res.body;
+                    status.should.equals(401);
+                    message.should.be.a("string").that.equals("Unauthorized, this is not your account/acount does not exist");
+                    done();
+                });
+        });
+
+        it("TC-206-4 Gebruiker succesvol verwijderd", (done) => {
+            chai
+                .request(server)
+                .delete("/api/user/1")
                 .set("authorization", "Bearer " + jwt.sign({ userId: 1 }, jwtSecretKey))
                 .end((err, res) => {
                     res.should.be.an("Object");
