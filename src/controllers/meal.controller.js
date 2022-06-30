@@ -168,8 +168,6 @@ let controller = {
     },
 
     deleteMealById: (req, res) => {
-        const deletesinglemealbyid = req.params.id;
-
         pool.getConnection(function(err, connection) {
             if (err) {
                 throw res.status(400).json({
@@ -179,7 +177,7 @@ let controller = {
             }
 
             connection.query(
-                "SELECT cookId FROM meal WHERE id = " + deletesinglemealbyid,
+                "SELECT cookId FROM meal WHERE id = " + req.params.id,
                 function(error, results) {
                     if (error) throw error;
                     connection.release();
@@ -196,7 +194,7 @@ let controller = {
                         });
                     } else {
                         connection.query(
-                            "DELETE FROM meal WHERE id = " + deletesinglemealbyid,
+                            "DELETE FROM meal WHERE id = " + req.params.id,
                             function(error, results, fields) {
                                 connection.release();
 
@@ -210,6 +208,78 @@ let controller = {
                                 }
                             }
                         );
+                    }
+                }
+            );
+        });
+    },
+
+    updateMealById(req, res, next) {
+        pool.getConnection(function(err, connection) {
+            //not connected
+            if (err) {
+                next(err);
+            }
+            connection.query(
+                "SELECT cookId FROM meal WHERE id = ?", [req.params.id],
+                function(error, results, fields) {
+                    // When done with the connection, release it.
+                    connection.release();
+                    // Handle error after the release.
+                    if (error) {
+                        next(error);
+                    }
+                    // Check if there are results
+                    if (results.length > 0) {
+                        // Check if user is cook
+                        if (Number(results[0].cookId) === req.userId) {
+                            // Removing 'T' form dateTime
+                            req.body.dateTime = req.body.dateTime.replace("T", " ").substring(0, 19)
+                            let allergenes = req.body.allergenes
+                            if (allergenes != null) {
+                                let allergenesString = "";
+                                // Looping over allergene array
+                                allergenes.forEach(function(gene) {
+                                    allergenesString = allergenesString + gene + ","
+                                });
+                                // Removing last ','
+                                allergenesString = allergenesString.slice(0, -1);
+                                req.body.allergenes = allergenesString;
+                            }
+                            connection.query(
+                                'UPDATE `meal` SET ? WHERE `id` = ?', [req.body, req.params.id],
+                                function(error, results, fields) {
+                                    if (error) throw error;
+                                    connection.release()
+                                        // If succesfull send 200 message
+                                    if (results.changedRows > 0) {
+                                        updatedMeal = req.body;
+                                        res.status(200).json({
+                                            status: 200,
+                                            result: { id: req.params.id, ...updatedMeal },
+                                        });
+                                    } else {
+                                        // Meal couldn't be updated, prob same values
+                                        res.status(400).json({
+                                            status: 400,
+                                            message: "Couldn't update meal with ID: " + req.params.id + ", values are probably the same",
+                                        });
+                                    }
+                                }
+                            );
+                        } else {
+                            // User is not cook, unauthorized
+                            return res.status(401).json({
+                                status: 401,
+                                message: "User Unauthorized, this is not your meal.",
+                            });
+                        }
+                    } else {
+                        // Meal doesn 't exists
+                        res.status(400).json({
+                            status: 400,
+                            message: "Can't find meal with ID: " + req.params.id,
+                        });
                     }
                 }
             );

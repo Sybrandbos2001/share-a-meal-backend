@@ -11,6 +11,14 @@ router.post(
     mealController.addMeal
 );
 
+// UC-302 Update meal 
+router.put(
+    "/api/meal/:id",
+    authController.validateToken,
+    mealController.validateMeal,
+    mealController.updateMealById
+);
+
 // UC-303 Get all meals
 router.get(
     "/api/meal",
