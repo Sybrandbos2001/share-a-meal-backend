@@ -4,7 +4,7 @@
 
 Hi ik ben Sybrand en ik heb voor het vak Programmeren-4 een Node-JS API gemaakt, deze API kan gebruikt gaan worden voor een online omgeving waarbij mensen maaltijden kunnen gaan aanbieden. Je kunt een account aanmaken en daarop maaltijden plaatsen die jij hebt gemaakt. Hieronder staan alle functionaliteiten van de API verder vermeld.
 
-De link naar mijn server: https://meal-a-share.herokuapp.com/
+De link naar mijn server: https://share-a-meal-2183391.herokuapp.com/
 
 ## Deze API heeft een aantal end-points met extra functies
 
