@@ -7,8 +7,7 @@ const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})/;
 
 let controller = {
     validateUser: (req, res, next) => {
-        let user = req.body;
-        let { firstName, lastName, emailAdress, password, street, city } = user;
+        let { firstName, lastName, emailAdress, password, street, city } = req.body;
 
         try {
             assert(typeof firstName === "string", "First firstName must be a string");

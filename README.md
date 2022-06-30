@@ -2,7 +2,7 @@
 
 ## Introductie
 
-Mijn naam is Joost van Dam, ik zit nu momenteel in mijn eerste jaar van de opleiding Informatica bij Avans Hogeschool in Breda. Voor het vak programmeren 4 hebben wij de opdracht gekregen om een API te maken voor de share-a-meal server. Met deze API kan je gebruikers en maaltijden toevoegen aan een database en deze opvragen.
+Hi ik ben Sybrand en ik heb voor het vak Programmeren-4 een Node-JS API gemaakt, deze API kan gebruikt gaan worden voor een online omgeving waarbij mensen maaltijden kunnen gaan aanbieden. Je kunt een account aanmaken en daarop maaltijden plaatsen die jij hebt gemaakt. Hieronder staan alle functionaliteiten van de API verder vermeld.
 
 De link naar mijn server: https://meal-a-share.herokuapp.com/
 
@@ -24,7 +24,7 @@ De link naar mijn server: https://meal-a-share.herokuapp.com/
 
 - **POST**: Aanmaken maaltijd _/api/meal_
 - **GET**: Ophalen maaltijden _/api/meal_
-- **GET**: Ophalen maaltijd _/api/meal/{id van de maaltijd}_
+- **GET**: Ophalen specifieke maaltijd _/api/meal/{id van de maaltijd}_
 - **PUT**: Informatie veranderen van een maaltijd _/api/meal/{id van de maaltijd}_
 - **DELETE**: Verwijder informatie van een maaltijd _/api/meal/{id van de maaltijd}_
 
@@ -33,7 +33,12 @@ De link naar mijn server: https://meal-a-share.herokuapp.com/
 Bij het ophalen van de gebruikers kan wordt gezocht op voornaam en op status van de gebruiker.
 Dit kan door ?firstName={voornaam van de gebruiker}&isActive={0 voor inactief of 1 voor actief} achter het end-point te zetten.
 
-Voorbeeld: _/api/user/firstName=Joost&isActive=1_
+Voorbeeld: _/api/user?firstName=Peter&isActive=1_
+
+Je kunt ook het aantal resultaten limiteren door length te gebruiken
+
+Voorbeeld: _/api/user/?isActive=1&length=2_
+
 
 ## Deze API maakt gebruik van de volgende frameworks en libraries
 
@@ -47,13 +52,14 @@ Voorbeeld: _/api/user/firstName=Joost&isActive=1_
 - ##### **mysql2**
 - ##### **JSON Web Token (JWT)**
 
-## Hoe gebruiken?
+## Hoe te gebruiken?
 
 1. Download de repository
 2. Download XAMPP en draai mysql
 3. Voer -npm install- uit in de console
 4. Voer -npm start- uit in de console
+5. Gebruik een API request applicatie zoals bijvoorbeeld Postman
 
-## Lokale integratietesten
+## Lokale integratietesten runnen
 
 - _npm run test_ in de console
