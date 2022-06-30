@@ -10,32 +10,33 @@ De link naar mijn server: https://share-a-meal-2183391.herokuapp.com/
 
 #### **Login:**
 
-- **POST**: Aanmaken login _/api/auth/login_
+- **POST**: Gebruiker inloggen _/api/auth/login_
 
 #### **User:**
 
-- **POST**: Aanmaken gebruikers _/api/user_
-- **GET**: Ophalen gebruikers _/api/user_
-- **GET**: Ophalen 1 gebruiker _/api/user/{id van de gebruiker}_
+- **POST**: Aanmaken gebruiker _/api/user_
+- **GET**: Ophalen alle gebruikers _/api/user_
+- **GET**: Ophalen specifieke gebruiker _/api/user/{id van de gebruiker}_
+- **GET**: Ophalen ingelogde gebruiker _/api/user/profile_
 - **PUT**: Informatie veranderen van een gebruiker _/api/user/{id van de gebruiker}_
-- **DELETE**: Verwijder informatie van een gebruiker _/api/user/{id van de gebruiker}_
+- **DELETE**: Verwijder een gebruiker _/api/user/{id van de gebruiker}_
 
 #### **Meal:**
 
 - **POST**: Aanmaken maaltijd _/api/meal_
-- **GET**: Ophalen maaltijden _/api/meal_
+- **GET**: Ophalen alle maaltijden _/api/meal_
 - **GET**: Ophalen specifieke maaltijd _/api/meal/{id van de maaltijd}_
 - **PUT**: Informatie veranderen van een maaltijd _/api/meal/{id van de maaltijd}_
-- **DELETE**: Verwijder informatie van een maaltijd _/api/meal/{id van de maaltijd}_
+- **DELETE**: Verwijder een maaltijd _/api/meal/{id van de maaltijd}_
 
 #### **Extra functie:**
 
-Bij het ophalen van de gebruikers kan wordt gezocht op voornaam en op status van de gebruiker.
+Bij het ophalen van de gebruikers kan worden gezocht op voornaam en op status van de gebruiker.
 Dit kan door ?firstName={voornaam van de gebruiker}&isActive={0 voor inactief of 1 voor actief} achter het end-point te zetten.
 
 Voorbeeld: _/api/user?firstName=Peter&isActive=1_
 
-Je kunt ook het aantal resultaten limiteren door length te gebruiken
+Je kunt ook het aantal resultaten limiteren door length te gebruiken.
 
 Voorbeeld: _/api/user/?isActive=1&length=2_
 
